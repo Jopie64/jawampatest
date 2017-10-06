@@ -1,15 +1,11 @@
 package com.jdm.jawampatest;
 
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-
-import rx.schedulers.Schedulers;
 import ws.wamp.jawampa.WampClient;
 import ws.wamp.jawampa.WampClientBuilder;
 import ws.wamp.jawampa.WampError;
 import ws.wamp.jawampa.connection.IWampConnectorProvider;
 import ws.wamp.jawampa.transport.netty.NettyWampClientConnectorProvider;
-import ws.wamp.jawampa.transport.netty.NettyWampConnectionConfig;
+import ws.wamp.jawampa.WampClient.ConnectingState;
 
 /**
  * Hello world!
@@ -42,8 +38,11 @@ public class App
         client.statusChanged()
             //.subscribeOn(Schedulers.newThread())
             //.observeOn(Schedulers.io())
+            .takeUntil(v -> !(v instanceof ConnectingState))
             .toBlocking()
             .forEach(s -> log(1, s.toString()));
+
+        client.close().toBlocking().last();
     }
 
     public static void main( String[] args )
