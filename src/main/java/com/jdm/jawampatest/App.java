@@ -1,5 +1,6 @@
 package com.jdm.jawampatest;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import rx.Observable;
@@ -12,7 +13,7 @@ import ws.wamp.jawampa.transport.netty.NettyWampClientConnectorProvider;
 
 interface IJWampProxy
 {
-    Object call(String name, Object... args);
+    Observable<JsonNode> call(String name, Object... args);
 }
 
 class JWamp
@@ -26,9 +27,10 @@ class JWamp
             this.wamp = wamp;
         }
 
-        public Object call(String name, Object... args)
+        public Observable<JsonNode> call(String name, Object... args)
         {
-            return wamp.call(name, args);
+            return wamp.call(name, args)
+                .map(r -> r.arguments().get(0));
         }
     }
 
@@ -95,7 +97,8 @@ public class App
     public void run() throws Exception
     {
         JWamp.fromJawampa("ws://pcs02.otap.local:9001/wamp", "realm1")
-            .map($ -> "Success!")
+            .switchMap(p -> p.call("com.peterconnects.toolbar.Login"))
+            .map(v -> "Success! " + v.asInt())
             .onErrorResumeNext($ -> Observable.just("Failed!"))
             .take(1)
             .toBlocking()
