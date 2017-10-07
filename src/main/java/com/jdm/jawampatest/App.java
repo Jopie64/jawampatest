@@ -41,8 +41,8 @@ public class App
     public void run() throws IOException, InterruptedException
     {
         Observable<IJWampProxy> wamp = this.wamp
-            .retryWhen(e -> Observable.timer(3, TimeUnit.SECONDS))
-            .repeatWhen(e -> Observable.timer(3, TimeUnit.SECONDS))
+            .retryWhen(e -> e.switchMap(v -> Observable.timer(3, TimeUnit.SECONDS)))
+            .repeatWhen(e -> e.switchMap(v -> Observable.timer(3, TimeUnit.SECONDS)))
             .replay(1).refCount();
         Observable<IJWampProxy> toolbarRoot = wamp
             .map(p -> p.makeProxy("com.peterconnects.toolbar."))
