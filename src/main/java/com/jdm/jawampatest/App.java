@@ -99,10 +99,10 @@ public class App
         JWamp.fromJawampa("ws://pcs02.otap.local:9001/wamp", "realm1")
             .switchMap(p -> p.call("com.peterconnects.toolbar.Login"))
             .map(v -> "Success! " + v.asInt())
-            .onErrorResumeNext($ -> Observable.just("Failed!"))
+            .onErrorResumeNext(e -> Observable.just("Failed! " + e.toString()))
             .take(1)
-            .toBlocking()
-            .forEach(s -> log(1, s));
+            .toBlocking() // toBlocking() is bad! Quick and dirty synchronous way to wait for success or failed.
+            .forEach(s -> log(1, s)); // forEach() called only once due to take(1)
     }
 
     public static void main( String[] args )
