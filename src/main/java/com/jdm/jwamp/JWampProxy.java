@@ -3,12 +3,12 @@ package com.jdm.jwamp;
 import com.fasterxml.jackson.databind.JsonNode;
 import rx.Observable;
 
-class SubProxy implements IJWampProxy
+class SubProxy implements JWampProxy
 {
     String uriBase;
-    IJWampProxy proxyBase;
+    JWampProxy proxyBase;
 
-    SubProxy(String uriBase, IJWampProxy proxyBase)
+    SubProxy(String uriBase, JWampProxy proxyBase)
     {
         this.uriBase = uriBase;
         this.proxyBase = proxyBase;
@@ -30,11 +30,11 @@ class SubProxy implements IJWampProxy
     }
 }
 
-public interface IJWampProxy
+public interface JWampProxy
 {
     Observable<JsonNode> call(String name, Object... args);
     Observable<JsonNode> subscribe(String name);
-    default IJWampProxy makeProxy(String uriBase)
+    default JWampProxy makeProxy(String uriBase)
     {
         return new SubProxy(uriBase, this);
     }

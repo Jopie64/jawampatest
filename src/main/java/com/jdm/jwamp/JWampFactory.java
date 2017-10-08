@@ -9,7 +9,7 @@ import ws.wamp.jawampa.WampClientBuilder;
 import ws.wamp.jawampa.connection.IWampConnectorProvider;
 import ws.wamp.jawampa.transport.netty.NettyWampClientConnectorProvider;
 
-class JawampaProxy implements IJWampProxy
+class JawampaProxy implements JWampProxy
 {
     private WampClient wamp;
 
@@ -35,7 +35,7 @@ class JawampaProxy implements IJWampProxy
 
 public class JWampFactory
 {
-    public static Observable<IJWampProxy> jawampa(String uri, String realm)
+    public static Observable<JWampProxy> jawampa(String uri, String realm)
     {
         return Observable.create(observer -> {
             IWampConnectorProvider connectorProvider = new NettyWampClientConnectorProvider();

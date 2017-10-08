@@ -1,6 +1,6 @@
 package com.jdm.jawampatest;
 
-import com.jdm.jwamp.IJWampProxy;
+import JWampProxy;
 import com.jdm.jwamp.JWampFactory;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
@@ -21,7 +21,7 @@ public class App
         System.out.println();
     }
 
-    private Observable<IJWampProxy> wamp;
+    private Observable<JWampProxy> wamp;
 
     App(String uri, String realm)
     {
@@ -40,14 +40,14 @@ public class App
 
     public void run() throws IOException, InterruptedException
     {
-        Observable<IJWampProxy> wamp = this.wamp
+        Observable<JWampProxy> wamp = this.wamp
             .retryWhen(e -> e.delay(3, TimeUnit.SECONDS))
             .repeatWhen(e -> e.delay(3, TimeUnit.SECONDS))
             .replay(1).refCount();
-        Observable<IJWampProxy> toolbarRoot = wamp
+        Observable<JWampProxy> toolbarRoot = wamp
             .map(p -> p.makeProxy("com.peterconnects.toolbar."))
             .replay(1).refCount();
-        Observable<IJWampProxy> toolbar = toolbarRoot
+        Observable<JWampProxy> toolbar = toolbarRoot
             .switchMap(p -> p.call("Login"))
             .switchMap(v -> toolbarRoot.map(p -> p.makeProxy(String.format("%s.", v.asText()))))
             .replay(1).refCount();
