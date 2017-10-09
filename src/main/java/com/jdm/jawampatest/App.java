@@ -1,13 +1,12 @@
 package com.jdm.jawampatest;
 
-import JWampProxy;
 import com.jdm.jwamp.JWampFactory;
+import com.jdm.jwamp.JWampProxy;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 import rx.Observable;
 import rx.Subscription;
-import rx.schedulers.Schedulers;
 
 /**
  * Hello world!
@@ -45,22 +44,18 @@ public class App
             .repeatWhen(e -> e.delay(3, TimeUnit.SECONDS))
             .replay(1).refCount();
         Observable<JWampProxy> toolbarRoot = wamp
-            .map(p -> p.makeProxy("com.peterconnects.toolbar."))
+            .map(p -> p.makeProxy("com.peterconnects.toolbar.", false))
             .replay(1).refCount();
         Observable<JWampProxy> toolbar = toolbarRoot
             .switchMap(p -> p.call("Login"))
-            .switchMap(v -> toolbarRoot.map(p -> p.makeProxy(String.format("%s.", v.asText()))))
+            .switchMap(v -> toolbarRoot.map(p -> p.makeProxy(String.format("%s.", v.asText()), true)))
+            .switchMap(tb -> tb.lifetime$()
+                .map(ok -> tb))
             .replay(1).refCount();
-        Observable<String> initialized = toolbar
-            .switchMap(p -> p.call("Initialize"))
-            .map(v -> String.format("Init %sOK", v.asBoolean() ? "": "NOT "));
 
-        
-        
         Observable<String> log$ = Observable.merge(
             wamp.map(p -> "Connected!"),
-            toolbar.map(p -> "Logged in!"),
-            initialized);
+            toolbar.map(p -> "Logged in!"));
 
         //log$ = wamp.map(v -> "Now then?");// Observable.just("Do I work?");
 
