@@ -1,6 +1,7 @@
 package com.jdm.jwamp;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import java.util.concurrent.atomic.AtomicBoolean;
 import rx.Observable;
 import rx.Subscription;
 
@@ -53,22 +54,27 @@ class SubProxyWithLifetime extends SubProxy
     {
         return Observable.create(observer -> {
             // Receiving end, ends the subscription
+            AtomicBoolean isEnded = new AtomicBoolean(true);
             observer.add(subscribe("End")
-                .subscribe(v -> observer.onCompleted()));
+                .subscribe(v -> { isEnded.set(true); observer.onCompleted(); }));
             call("Initialize")
                 .subscribe(alive -> {
                     if (alive.asBoolean()) {
+                        isEnded.set(false);
                         observer.onNext(true);
                     } else {
                         observer.onCompleted();
                     }
-                });
+                },
+                e -> observer.onCompleted());
             observer.add(new Subscription() {
                 boolean isSubscribed = true;
                 // This is called when the observable is unsubscribed
                 public void unsubscribe() {
                     isSubscribed = false;
-                    call("End");
+                    if (!isEnded.get())
+                        call("End");
+                    isEnded.set(true);
                 }
                 public boolean isUnsubscribed() { return !isSubscribed; }
             });

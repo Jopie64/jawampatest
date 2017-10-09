@@ -48,6 +48,7 @@ public class App
             .replay(1).refCount();
         Observable<JWampProxy> toolbar = toolbarRoot
             .switchMap(p -> p.call("Login"))
+            .retryWhen(e -> e.delay(2, TimeUnit.SECONDS))
             .switchMap(v -> toolbarRoot.map(p -> p.makeProxy(String.format("%s.", v.asText()), true)))
             .switchMap(tb -> tb.lifetime$()
                 .map(ok -> tb))
