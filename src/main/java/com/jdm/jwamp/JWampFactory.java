@@ -29,6 +29,14 @@ class JawampaProxy implements JWampProxy
         return wamp.makeSubscription(name)
             .map(v -> v.arguments().get(0));
     }
+
+    public Observable<Boolean> lifetime$()
+    {
+        return wamp.statusChanged()
+            .takeWhile(v -> !(v instanceof WampClient.DisconnectedState))
+            .filter(v -> v instanceof WampClient.ConnectedState)
+            .map(v -> true);
+    }
 }
 
 
